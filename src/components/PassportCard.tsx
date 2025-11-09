@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, MapPin, Shield, Syringe, FileText, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, Shield, Syringe, FileText, ExternalLink, User, Phone, Mail, Building2 } from "lucide-react";
 
 interface Vaccination {
   name: string;
@@ -10,11 +10,20 @@ interface Vaccination {
   nextDue?: string;
 }
 
+interface OwnerDetails {
+  name: string;
+  farmName: string;
+  phone: string;
+  email: string;
+  address: string;
+  registrationNumber: string;
+}
+
 interface PassportData {
   muzzleId: string;
   animalType: "cow" | "buffalo";
   photo: string;
-  owner: string;
+  owner: OwnerDetails;
   location: string;
   birthDate: string;
   vaccinations: Vaccination[];
@@ -95,6 +104,64 @@ export const PassportCard = ({ data }: PassportCardProps) => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Farmer/Owner Details */}
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <User className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold text-lg">Farmer Details</h3>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 bg-muted rounded-lg space-y-3">
+              <div className="flex items-start gap-2">
+                <User className="w-4 h-4 text-muted-foreground mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Owner Name</p>
+                  <p className="font-medium">{data.owner.name}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Building2 className="w-4 h-4 text-muted-foreground mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Farm Name</p>
+                  <p className="font-medium">{data.owner.farmName}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Shield className="w-4 h-4 text-muted-foreground mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Registration No.</p>
+                  <p className="font-mono text-xs">{data.owner.registrationNumber}</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 bg-muted rounded-lg space-y-3">
+              <div className="flex items-start gap-2">
+                <Phone className="w-4 h-4 text-muted-foreground mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Phone</p>
+                  <p className="font-medium">{data.owner.phone}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Mail className="w-4 h-4 text-muted-foreground mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Email</p>
+                  <p className="font-medium text-xs break-all">{data.owner.email}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Address</p>
+                  <p className="font-medium text-xs">{data.owner.address}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

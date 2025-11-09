@@ -10,11 +10,19 @@ import { Search, Plus, Database, Shield } from "lucide-react";
 import farmBgPattern from "@/assets/farm-bg-pattern.jpg";
 import heroFarm from "@/assets/hero-farm.jpg";
 
+
 const mockPassportData = {
   muzzleId: "MUZ-ABC123XYZ",
   animalType: "cow" as const,
   photo: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800&q=80",
-  owner: "John Smith Farms",
+  owner: {
+    name: "John Smith",
+    farmName: "Green Valley Dairy Farm",
+    phone: "+1 (555) 123-4567",
+    email: "john.smith@greenvalleyfarm.com",
+    address: "1234 Farm Road, Green Valley, Montana 59001",
+    registrationNumber: "FARM-MT-2020-5678",
+  },
   location: "Green Valley, Montana",
   birthDate: "March 15, 2022",
   vaccinations: [
