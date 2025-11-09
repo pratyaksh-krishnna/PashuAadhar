@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Database, Shield } from "lucide-react";
+import farmBgPattern from "@/assets/farm-bg-pattern.jpg";
+import heroFarm from "@/assets/hero-farm.jpg";
 
 const mockPassportData = {
   muzzleId: "MUZ-ABC123XYZ",
@@ -52,20 +54,33 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background bg-cover bg-fixed bg-center"
+      style={{ 
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.95)), url(${farmBgPattern})`,
+      }}
+    >
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-hero-gradient text-white py-12">
-        <div className="container mx-auto px-4">
+      <section 
+        className="relative text-white py-16 overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(16, 185, 129, 0.85), rgba(29, 78, 216, 0.85)), url(${heroFarm})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold">
+            <h1 className="text-4xl md:text-5xl font-bold drop-shadow-lg">
               Livestock Digital Passport System
             </h1>
-            <p className="text-lg md:text-xl opacity-90">
+            <p className="text-lg md:text-xl opacity-95 drop-shadow">
               Secure, blockchain-verified identification for cattle using advanced muzzle recognition technology
             </p>
-            <div className="flex flex-wrap gap-4 justify-center pt-4">
+            <div className="flex flex-wrap gap-4 justify-center pt-4 drop-shadow-md">
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur px-4 py-2 rounded-full">
                 <Shield className="w-5 h-5" />
                 <span className="text-sm font-medium">Blockchain Verified</span>
