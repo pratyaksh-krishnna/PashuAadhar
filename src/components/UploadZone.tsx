@@ -1,12 +1,16 @@
 import { useState, useCallback } from "react";
-import { Upload, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
 interface UploadZoneProps {
   onUploadComplete: (file: File, muzzleId: string) => void;
 }
+
+// Configure your backend URL here
+const API_URL = "http://localhost:8080";
 
 export const UploadZone = ({ onUploadComplete }: UploadZoneProps) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -14,6 +18,7 @@ export const UploadZone = ({ onUploadComplete }: UploadZoneProps) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -44,13 +49,15 @@ export const UploadZone = ({ onUploadComplete }: UploadZoneProps) => {
   };
 
   const processFile = (selectedFile: File) => {
+    setError(null);
+    
     // Validate file
     if (!selectedFile.type.startsWith("image/")) {
-      alert("Please upload an image file");
+      setError("Please upload an image file (JPG, PNG, WEBP)");
       return;
     }
     if (selectedFile.size > 10 * 1024 * 1024) {
-      alert("File size must be less than 10MB");
+      setError("File size must be less than 10MB");
       return;
     }
 
@@ -67,28 +74,81 @@ export const UploadZone = ({ onUploadComplete }: UploadZoneProps) => {
 
     setUploading(true);
     setProgress(0);
+    setError(null);
 
-    // Simulate upload and analysis
-    const interval = setInterval(() => {
+    // Simulate progress
+    const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
+        if (prev >= 90) {
+          return prev;
         }
         return prev + 10;
       });
-    }, 200);
+    }, 300);
 
-    // Mock muzzle detection API call
-    setTimeout(() => {
-      const mockMuzzleId = `MUZ-${Date.now().toString(36).toUpperCase()}`;
-      onUploadComplete(file, mockMuzzleId);
+    try {
+      // Prepare form data - use "image" as field name to match backend
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // Send to backend
+      const response = await fetch(`${API_URL}/muzzle-detect`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Complete progress
+      setProgress(100);
+      clearInterval(progressInterval);
+
+      // Expecting backend response like:
+      // { success: true, muzzleId: "MUZ-123XYZ", confidence: 0.97 }
+      if (data.success && data.muzzleId) {
+        // Wait a moment to show 100% before completing
+        setTimeout(() => {
+          onUploadComplete(file, data.muzzleId);
+        }, 500);
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (err) {
+      clearInterval(progressInterval);
+      console.error("Analysis error:", err);
+      setError(
+        err instanceof Error 
+          ? err.message 
+          : "Failed to analyze muzzle pattern. Please try again."
+      );
+      setProgress(0);
+    } finally {
+      clearInterval(progressInterval);
       setUploading(false);
-    }, 2500);
+    }
+  };
+
+  const handleClear = () => {
+    setFile(null);
+    setPreview(null);
+    setProgress(0);
+    setError(null);
   };
 
   return (
     <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <div
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -143,27 +203,34 @@ export const UploadZone = ({ onUploadComplete }: UploadZoneProps) => {
                 className="w-full h-64 object-contain"
               />
             </div>
+            
             {uploading && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Analyzing muzzle pattern...</span>
-                  <span className="font-semibold text-foreground">{progress}%</span>
+                  <span className="text-muted-foreground">
+                    Analyzing muzzle pattern...
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    {progress}%
+                  </span>
                 </div>
                 <Progress value={progress} />
               </div>
             )}
+            
             {!uploading && (
               <div className="flex gap-2">
-                <Button onClick={handleAnalyze} className="flex-1">
+                <Button 
+                  onClick={handleAnalyze} 
+                  className="flex-1"
+                  disabled={uploading}
+                >
                   Analyze Muzzle Pattern
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setFile(null);
-                    setPreview(null);
-                    setProgress(0);
-                  }}
+                  onClick={handleClear}
+                  disabled={uploading}
                 >
                   Clear
                 </Button>
